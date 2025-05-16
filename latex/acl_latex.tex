@@ -1,5 +1,5 @@
 % This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
-\pdfoutput=1
+% \pdfoutput=1
 % In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
 
 \documentclass[11pt]{article}
@@ -111,57 +111,122 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This document is a supplement to the general instructions for *ACL authors. It contains instructions for using the \LaTeX{} style files for ACL conferences.
-The document itself conforms to its own specifications, and is therefore an example of what your manuscript should look like.
-These instructions should be used both for papers submitted for review and for final versions of accepted papers.
+  This research addresses the pressing issue of the lack of high-quality, large-scale datasets, a critical challenge in the advancement of Japanese Vision and Language (V\&L) models. Existing Japanese V\&L datasets face limitations: those created through manual annotation are difficult to scale, those translated from English datasets lack Japan-specific cultural context, and those automatically collected from the web suffer from quality issues. To overcome these challenges, this paper proposes a novel three-stage methodology for scalably constructing a high-quality V\&L dataset that reflects Japan-specific knowledge and culture. The proposed method consists of (1) collecting images and alt-texts from the web, (2) applying object detection to the collected data, and (3) refining the alt-texts using a Large Language Model (LLM). Using this method, we constructed an image caption dataset of 4 million pairs and a Visual Question Answering (VQA) dataset of 4 million pairs. Results from training a V\&L model on our constructed dataset confirmed a significant improvement in Japanese understanding capabilities compared to training on existing Japanese datasets alone. This research demonstrates the effectiveness of the proposed methodology and contributes to the future progress of Japanese V\&L research.
 \end{abstract}
 
 \section{Introduction}
 
-These instructions are for authors submitting papers to *ACL conferences using \LaTeX. They are not self-contained. All authors must follow the general instructions for *ACL proceedings,\footnote{\url{http://acl-org.github.io/ACLPUB/formatting.html}} and this document contains additional instructions for the \LaTeX{} style files.
+In recent years, research and development of Vision and Language (V\&L) models, which integratively process visual and linguistic information, have rapidly advanced, with expectations for a wide range of applications such as image caption generation, Visual Question Answering (VQA), and image retrieval. Large-scale, high-quality training datasets are indispensable for improving the performance of these V\&L models. However, in V\&L research targeting the Japanese language, the lack of such datasets has become a serious bottleneck.
 
-The templates include the \LaTeX{} source of this document (\texttt{acl\_latex.tex}),
-the \LaTeX{} style file used to format it (\texttt{acl.sty}),
-an ACL bibliography style (\texttt{acl\_natbib.bst}),
-an example bibliography (\texttt{custom.bib}),
-and the bibliography for the ACL Anthology (\texttt{anthology.bib}).
+Existing Japanese V\&L datasets have several issues. Firstly, datasets meticulously annotated by humans (e.g., STAIR Captions \cite{吉川友也2017stair}) are of high quality but are limited in terms of data scale due to the enormous cost and time required for their creation. Secondly, while there are attempts to create Japanese datasets by machine-translating large-scale datasets developed in English-speaking countries (e.g., COCO \cite{lin2014microsoft}), it has been pointed out that Japan-specific contexts, knowledge, or cultural nuances are often lost or unnatural expressions arise during the translation process \cite{sasagawa2024constructing}. Furthermore, approaches that automatically collect images and corresponding alt-texts from the web (e.g., Japanese Image Text Pairs \cite{sasagawa2024constructing}) are effective for large-scale data collection, but they often have significant quality issues, such as texts being inappropriate as natural Japanese or the semantic content of images and texts not matching.
 
-\section{Engines}
+Against this backdrop, the objective of this research is to propose a method for constructing a high-quality and scalable Japanese V\&L dataset that appropriately reflects Japan-specific knowledge and culture. The proposed method consists of a three-stage pipeline: first, applying object detection technology to images and alt-texts collected from the web to assist in understanding image content, and then using a Large Language Model (LLM) to refine the alt-texts into more natural Japanese that is consistent with the image content.
 
-To produce a PDF file, pdf\LaTeX{} is strongly recommended (over original \LaTeX{} plus dvips+ps2pdf or dvipdf).
-The style file \texttt{acl.sty} can also be used with
-lua\LaTeX{} and
-Xe\LaTeX{}, which are especially suitable for text in non-Latin scripts.
-The file \texttt{acl\_lualatex.tex} in this repository provides
-an example of how to use \texttt{acl.sty} with either
-lua\LaTeX{} or
-Xe\LaTeX{}.
+The main contributions of this research are the following three points:
 
-\section{Preamble}
+Provision of a large-scale, high-quality Japanese V\&L dataset: Using the proposed method, we constructed an image caption dataset with 4 million pairs and a VQA dataset with 4 million pairs.
+Demonstration of improved performance of Japanese V\&L models using the proposed dataset: We experimentally showed that training V\&L models on our constructed dataset improves performance in various V\&L tasks compared to training on existing Japanese datasets.
+Establishment of a scalable dataset construction method: By combining automatic collection from the web with automatic refinement by an LLM, we present a framework for efficiently constructing large-scale datasets without manual intervention.
+The remainder of this paper is organized as follows. Chapter 2 provides an overview of related research and clarifies the positioning of this study. Chapter 3 details the proposed dataset construction method. Chapter 4 describes the evaluation of the constructed dataset and the performance evaluation experiments of V\&L models using it. Chapter 5 presents the experimental results, and Chapter 6 discusses these results, the limitations of this research, and future prospects. Finally, Chapter 7 concludes the paper.
+
+\section{Related Work}
+
+This chapter provides an overview of existing research related to the construction of Japanese V\&L datasets.
+
+\subsection{Overview of V\&L Datasets}
+
+A V\&L dataset consists of pairs of text and images and is used for training V\&L models. Methods for constructing V\&L datasets can be broadly classified into four categories: (1) those constructed by human annotation, (2) those constructed by web crawling, (3) those constructed by translating datasets from other languages such as English, and (4) those constructed using Large Language Models (LLMs).
+These methods and representative datasets constructed by them are detailed below.
+
+\subsection{V\&L Dataset Construction Methods and Existing Datasets}
+
+\subsubsection{Datasets Constructed by Human Annotation}
+
+Datasets constructed by manual annotation generally require significant cost and time. On the other hand, they have the advantage that the image and text content are well-matched, and the text quality is high.
+Famous English image caption datasets include Microsoft COCO Captions \cite{lin2014microsoft} and Flickr30k \cite{young2014image}. A representative Japanese dataset is STAIR Captions \cite{吉川友也2017stair}.
+STAIR Captions were annotated through crowdsourcing. It was constructed over approximately six months by about 2,100 workers, with five captions provided for each of its 164,062 images.
+
+\subsubsection{Datasets Constructed by Web Crawling}
+
+The web contains a vast number of images and their accompanying texts (such as alt-text), and much research has been conducted on automatically collecting and processing these to construct large-scale V\&L datasets. English datasets constructed with this approach include Conceptual 12M [New Ref. A], and a well-known Japanese dataset is Japanese Image Text Pairs [New Ref. B].
+Japanese Image Text Pairs [New Ref. B] constructed approximately 6.6 million Japanese image-caption pairs using images and alt-texts obtained from the web.
+While datasets constructed this way are large-scale, due to the nature of alt-text, quality issues may remain, such as the text not being natural Japanese sentences, describing only a small part of the image, or the image and text content not necessarily matching perfectly semantically.
+
+\subsubsection{Datasets Constructed by Translation}
+
+In English-speaking countries, V\&L datasets are more abundant both quantitatively and qualitatively compared to other languages. Therefore, there are attempts to machine-translate these English datasets into other languages (including Japanese). For example, LLaVA-Instruct-150K-JA [New Ref. D] is a dataset created by translating the English instruction-following dataset LLaVA Visual Instruct 150K [New Ref. E] into Japanese using machine translation services like DeepL API.
+Such translation-based datasets offer the advantage of relatively easily extending existing large-scale resources to other languages. However, they are prone to issues such as quality degradation due to translation accuracy (mistranslations, unnatural expressions) and insufficient reflection of knowledge, context, and cultural phenomena specific to the target language (in this case, Japanese).
+
+\subsubsection{Datasets Constructed Using LLMs}
+
+With the recent improvement in the capabilities of Large Language Models (LLMs), approaches utilizing LLMs for V\&L dataset construction have emerged. LLMs are particularly often used in the construction of "instruction-following data," which is used to train models to generate responses based on specific instructions or commands.
+LLaVA Visual Instruct 150K [New Ref. E] is one such instruction-following dataset, constructed using LLMs like GPT-4 [New Ref. F]. The construction procedure for this dataset is as follows:
+
+\begin{enumerate}
+  \item Use an existing image caption dataset where multiple captions are assigned to an image (e.g., COCO Captions [4]) as the source data.
+  \item Input the image into an object detector (e.g., YOLO) to identify the location information (bounding boxes) of major objects in the image.
+  \item Input the existing captions and the detected object location information in text format to GPT-4, and have GPT-4 generate conversational data, detailed image description data, and question-answering data involving complex reasoning. In this process, GPT-4 is fed text information extracted from the image (captions, object information), not the image itself.
+\end{enumerate}
+
+Thus, by leveraging the high reasoning and language generation capabilities of LLMs, it becomes possible to generate diverse and complex V\&L datasets. However, there are points to be cautious about with this approach. Firstly, when using the API of a commercial LLM like GPT-4 for dataset construction, it is necessary to comply with its terms of use (e.g., OpenAI's license). For example, OpenAI's terms may prohibit the use of GPT-4 output for training models that compete with OpenAI, which could restrict the commercial use of V\&L models trained on datasets constructed this way. Secondly, it should also be noted that datasets like LLaVA Visual Instruct 150K require an existing source image caption dataset, meaning they are not generating entirely new datasets from scratch but are rather extensions of existing datasets.
+
+\subsection{Positioning of This Research}
+
+Based on the related research described above, the proposed method in this study has the following novelty and advantages.
+Existing manually annotated Japanese datasets (e.g., STAIR Captions [3]) are high-quality but small in scale. Datasets automatically constructed by web crawling (e.g., Japanese Image Text Pairs [New Ref. B]) are large-scale but have inconsistent quality, particularly in terms of text naturalness and semantic consistency with images. Translated datasets (e.g., LLaVA-Instruct-150K-JA [New Ref. D]) have issues capturing Japan-specific contexts. Existing dataset construction using LLMs (e.g., LLaVA Visual Instruct 150K [New Ref. E]) can generate high-quality instruction-following data but depends on source data and has licensing issues.
+
+This research aims to strike a balance among these challenges by introducing a process for large-scale image and alt-text pairs collected from the web: (1) assisting image content understanding through object detection, and (2) improving alt-text quality (refining into natural Japanese, enhancing semantic consistency with images) using an LLM. Specifically, it attempts to efficiently construct a large-scale Japanese V\&L dataset of quality comparable to manual annotation, while retaining Japan-specific content, by leveraging the scalability of web collection and automatically improving text quality using LLMs. This is an approach that significantly improves the quality of existing automatically collected datasets and reduces the cultural gap inherent in translated datasets. Thus, this research proposes a new dataset construction paradigm that considers multiple aspects: scalability, quality, and reflection of Japan-specific context.
+
+\section{Method}
+
+The dataset construction procedure is shown in [Figure 2: Overview of the dataset construction procedure]. The construction procedure is roughly divided into the following three stages:
+
+\begin{enumerate}
+  \item Acquire images and alt-texts from Common Crawl WARC files.
+  \item Perform object detection in images using an object detector.
+  \item Refine texts using an LLM.
+\end{enumerate}
+
+Alt-text is used as a description of an image, but it may not adequately describe the image or may be in poorly written Japanese. Therefore, by leveraging image information to refine alt-text with an LLM, a higher-quality dataset can be constructed.
+
+\section{Acquisition of Images and Alt-texts}
+
+In this study, Common Crawl was used as the source for acquiring images and alt-texts. The repository crawled between August 3, 2024, and August 16, 2024, consisting of 2.3 billion pages, was used.
+Since Common Crawl is a dataset crawled from web pages across the entire internet, it includes data from non-Japanese sites and inappropriate data. Therefore, we first filtered the pages. Pages where the lang attribute of the <html> tag was "ja" were considered Japanese sites, and other pages were excluded. Additionally, pages containing inappropriate words were excluded. As a list of inappropriate words, we used a combination of \verb|ja_adult_keywords|, \verb|ja_discrimination_keywords|, and \verb|ja_violence_keywords| from llm-jp-corpus2, and the English list of inappropriate words from List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words3.
+From the pages that passed the filtering, images and alt-texts were downloaded. To maintain quality, we excluded: (1) images whose extensions were not jpeg, jpg, or png, (2) alt-texts shorter than 10 characters, and (3) alt-texts that did not contain Japanese.
+
+\subsection{Object Detection in Images}
+
+The model used for tagging images was the Recognize Anything Model (RAM) [20], with the RAM++(14M)*4 checkpoint. Additionally, Grounding DINO [14] was used as a model to obtain the confidence score for each tag.
+Finally, tags with high confidence scores were selected and filtered. The confidence threshold was set to 0.25.
+
+\subsection{Alt-text Refinement by LLM}
+
+Finally, the alt-texts were refined using an LLM to create caption data and VQA data. The LLM used was CyberAgentLM3-22B-Chat [9].
 
 The first line of the file must be
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \documentclass[11pt]{article}
 \end{verbatim}
 \end{quote}
 
 To load the style file in the review version:
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \usepackage[review]{acl}
 \end{verbatim}
 \end{quote}
 For the final version, omit the \verb|review| option:
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \usepackage{acl}
 \end{verbatim}
 \end{quote}
 
 To use Times Roman, put the following in the preamble:
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \usepackage{times}
 \end{verbatim}
 \end{quote}
@@ -173,7 +238,7 @@ Set the title and author using \verb|\title| and \verb|\author|. Within the auth
 
 By default, the box containing the title and author names is set to the minimum of 5 cm. If you need more space, include the following in the preamble:
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \setlength\titlebox{<dim>}
 \end{verbatim}
 \end{quote}
@@ -232,26 +297,26 @@ You must include it explicitly in the \LaTeX{} preamble (after the
 \verb|\documentclass| declaration and before \verb|\begin{document}|) using
 \verb|\usepackage{graphicx}|.
 
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{example-image-golden}
-  \caption{A figure with a caption that runs for more than one line.
-    Example image is usually available through the \texttt{mwe} package
-    without even mentioning it in the preamble.}
-  \label{fig:experiments}
-\end{figure}
+% \begin{figure}[t]
+%   \includegraphics[width=\columnwidth]{example-image-golden}
+%   \caption{A figure with a caption that runs for more than one line.
+%     Example image is usually available through the \texttt{mwe} package
+%     without even mentioning it in the preamble.}
+%   \label{fig:experiments}
+% \end{figure}
 
-\begin{figure*}[t]
-  \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
-  \includegraphics[width=0.48\linewidth]{example-image-b}
-  \caption {A minimal working example to demonstrate how to place
-    two images side-by-side.}
-\end{figure*}
+% \begin{figure*}[t]
+%   \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
+%   \includegraphics[width=0.48\linewidth]{example-image-b}
+%   \caption {A minimal working example to demonstrate how to place
+%     two images side-by-side.}
+% \end{figure*}
 
 \subsection{Hyperlinks}
 
 Users of older versions of \LaTeX{} may encounter the following error during compilation:
 \begin{quote}
-\verb|\pdfendlink| ended up in different nesting level than \verb|\pdfstartlink|.
+  \verb|\pdfendlink| ended up in different nesting level than \verb|\pdfstartlink|.
 \end{quote}
 This happens when pdf\LaTeX{} is used and a citation splits across a page boundary. The best way to fix this is to upgrade \LaTeX{} to 2018-12-01 or later.
 
@@ -294,7 +359,7 @@ with other style files.
 The \LaTeX{} and Bib\TeX{} style files provided roughly follow the American Psychological Association format.
 If your own bib file is named \texttt{custom.bib}, then placing the following before any appendices in your \LaTeX{} file will generate the references section for you:
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \bibliography{custom}
 \end{verbatim}
 \end{quote}
@@ -302,7 +367,7 @@ If your own bib file is named \texttt{custom.bib}, then placing the following be
 You can obtain the complete ACL Anthology as a Bib\TeX{} file from \url{https://aclweb.org/anthology/anthology.bib.gz}.
 To include both the Anthology and your own .bib file, use the following instead of the above.
 \begin{quote}
-\begin{verbatim}
+  \begin{verbatim}
 \bibliography{anthology,custom}
 \end{verbatim}
 \end{quote}
