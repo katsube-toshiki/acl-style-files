@@ -1,1 +1,62 @@
+# LaTeX一時ファイル
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# PDFファイル（必要に応じてコメントアウト）
+*.pdf
+
+# ビルド済みファイル
+*.dvi
+*.xdv
+*-converted-to.*
+
+# 生成されたbibliographyファイル
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Beamerスライド関連
+*.nav
+*.pre
+*.snm
+*.vrb
+
+# hyperrefとbookmark情報
+*.brf
+
+# 目次ファイル
+*.tdo
+
+# エディタバックアップファイル
+*~
+*.backup
+*.bak
+*.sav
+
+# Latexmkで生成されたファイル
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# macOS関連
+.DS_Store
+
+# 既存の出力と情報ディレクトリを維持
 out/
+data/
